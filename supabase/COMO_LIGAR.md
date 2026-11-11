@@ -19,4 +19,4 @@ insert into public.platform_admins (user_id)
 select id from auth.users where email = 'SEU-EMAIL-AQUI';
 ```
 
-O que já fica pronto no banco: clínicas, assinaturas e planos, usuários por clínica (dona, recepção, profissional), equipe, salas, serviços, horários, pacientes, agenda **com bloqueio de horário duplicado no próprio banco**, avaliações (só profissional vê), conversas e mensagens do WhatsApp, propostas, notificações, tarefas, lembretes, configurações da IA, consumo mensal, suporte e leads do site. Cada clínica só vê os próprios dados.
+O que já fica pronto no banco: clínicas, assinaturas e planos, usuários por clínica (dona, recepção, profissional), equipe, salas, serviços, horários, pacientes, agenda **com bloqueio de horário duplicado no próprio banco**, avaliações (só profissional vê), conversas e mensagens do WhatsApp, follow-up automático (etapas, regras e fila), propostas, notificações, tarefas, lembretes, configurações da IA, consumo mensal, suporte e leads do site. Cada clínica só vê os próprios dados.

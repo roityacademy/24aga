@@ -44,15 +44,15 @@ const IC = {
 const ic = (n, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
 
 const PROFILES = {
-  admin:{ get label(){ return DR() + ' · Administração'; }, staff:'grazi', desc:'Acesso gerencial completo da clínica', routes:['visao','agenda','atendimento','assistente','pacientes','propostas','servicos','automacoes','relatorios','configuracoes'] },
-  recepcao:{ label:'Camila · Recepção', staff:'camila', desc:'Agenda, atendimento, cadastros e agendamentos. Sem informações clínicas.', routes:['visao','agenda','atendimento','pacientes','servicos','automacoes'] },
+  admin:{ get label(){ return DR() + ' · Administração'; }, staff:'grazi', desc:'Acesso gerencial completo da clínica', routes:['visao','agenda','atendimento','assistente','pacientes','propostas','servicos','automacoes','followup','relatorios','configuracoes'] },
+  recepcao:{ label:'Camila · Recepção', staff:'camila', desc:'Agenda, atendimento, cadastros e agendamentos. Sem informações clínicas.', routes:['visao','agenda','atendimento','pacientes','servicos','automacoes','followup'] },
   profissional:{ get label(){ return PRO() + ' · Profissional'; }, staff:'paula', desc:'Agenda própria, pacientes autorizadas e propostas pertinentes', routes:['visao','agenda','pacientes','propostas','servicos'] },
   plataforma:{ label:'Dono da plataforma 24AGÁ', staff:null, desc:'Clientes, planos, pagamentos e consumo. Nunca dados de pacientes.', routes:['licencas'] },
 };
 const ROUTES = {
   visao:{ t:'Visão geral', i:'home', g:'Clínica' }, agenda:{ t:'Agenda', i:'cal', g:'Clínica' }, atendimento:{ t:'Atendimento', i:'chat', g:'Clínica' },
   assistente:{ t:'Assistente de IA', i:'spark', g:'Clínica' }, pacientes:{ t:'Pacientes e funil', i:'users', g:'Clínica' }, propostas:{ t:'Propostas', i:'doc', g:'Clínica' },
-  servicos:{ t:'Tratamentos', i:'heart', g:'Gestão' }, automacoes:{ t:'Lembretes e retornos', i:'bolt', g:'Gestão' }, relatorios:{ t:'Relatórios', i:'chart', g:'Gestão' },
+  servicos:{ t:'Tratamentos', i:'heart', g:'Gestão' }, automacoes:{ t:'Lembretes e retornos', i:'bolt', g:'Gestão' }, followup:{ t:'Follow-up automático', i:'redo', g:'Gestão' }, relatorios:{ t:'Relatórios', i:'chart', g:'Gestão' },
   configuracoes:{ t:'Configurações', i:'gear', g:'Gestão' }, licencas:{ t:'Clientes 24AGÁ', i:'building', g:'Plataforma 24AGÁ' },
 };
 
@@ -155,7 +155,7 @@ function pushToast(text, go, title) {
   const el = document.createElement('div'); el.className = 'toast';
   el.innerHTML = `<img src="mono.svg" alt=""><div class="grow"><div class="tt"><span>${esc(title || S.settings.product)}</span><span>agora</span></div><p>${esc(text)}</p></div>`;
   el.onclick = () => { el.remove(); if (go) goTo(go[0], go[1]); };
-  box.prepend(el); setTimeout(() => el.remove(), 6500);
+  box.prepend(el); [...box.children].slice(3).forEach(x => x.remove()); setTimeout(() => el.remove(), 6500);
 }
 function toast(text) {
   const box = $('#toasts'); if (!box) return;
@@ -193,9 +193,9 @@ const mHead = (t, sub) => `<div class="mh"><div><h3>${t}</h3>${sub ? `<p class="
 
 /* ================= SITE DE VENDA DA 24AGÁ ================= */
 const PLANS24 = [
-  { k:'essencial', name:'Essencial', price:397, impl:1500, who:'Profissional sozinha ou consultório pequeno', feats:['IA no WhatsApp 24h · até 300 conversas/mês','Agenda e funil de pacientes','Aprovação de horários pelo celular','Lembretes de consulta','2 usuários'] },
-  { k:'profissional', name:'Profissional', price:697, impl:2500, top:true, who:'Clínica com 2 a 4 profissionais', feats:['Tudo do Essencial','Até 800 conversas/mês','Propostas em PDF com a sua marca','Relatório mensal de resultados','5 usuários'] },
-  { k:'premium', name:'Premium', price:1197, impl:3800, who:'Clínica maior ou com mais de uma unidade', feats:['Tudo do Profissional','Até 2.000 conversas/mês','Campanhas de reativação de pacientes','Várias salas, profissionais e unidades','Usuários ilimitados · suporte prioritário'] },
+  { k:'essencial', name:'Essencial', price:397, impl:1500, who:'Profissional sozinha ou consultório pequeno', feats:['IA no WhatsApp 24h · até 300 conversas/mês','Agenda e funil de pacientes','Aprovação de horários pelo celular','Follow-up automático em 3 etapas','Lembretes de consulta','2 usuários'] },
+  { k:'profissional', name:'Profissional', price:697, impl:2500, top:true, who:'Clínica com 2 a 4 profissionais', feats:['Tudo do Essencial','Até 800 conversas/mês','Follow-up ilimitado, personalizado pela IA','Propostas em PDF com a sua marca','Relatório mensal de resultados','5 usuários'] },
+  { k:'premium', name:'Premium', price:1197, impl:3800, who:'Clínica maior ou com mais de uma unidade', feats:['Tudo do Profissional','Até 2.000 conversas/mês','Follow-up de propostas, faltas e inativos','Campanhas de reativação de pacientes','Várias salas, profissionais e unidades','Usuários ilimitados · suporte prioritário'] },
 ];
 const IMPL24 = {
   essencial:['Conexão do WhatsApp oficial','Cadastro de até 10 serviços e valores','Treinamento da IA: tom de voz, dúvidas frequentes e regras','1 hora de treinamento da equipe'],
@@ -215,6 +215,7 @@ function pitchView() {
     ['bell','Aprovação no celular','A IA reserva; a dona da clínica aprova, sugere outro horário ou recusa com um toque.','visao'],
     ['chat','Passa para a equipe','Assunto de saúde, reclamação ou dúvida difícil vai direto para uma pessoa, com prioridade.','atendimento'],
     ['doc','Propostas com a sua marca','Depois da avaliação, a profissional monta a proposta e imprime em A4 ou PDF.','propostas'],
+    ['redo','Follow-up automático','1 hora, 1 dia, 3 dias depois: a 24AGÁ retoma o contato sozinha e para quando o paciente responde.','followup'],
     ['bolt','Lembretes automáticos','Confirmação, lembrete de véspera e retorno de proposta, sem ninguém precisar lembrar.','automacoes'],
     ['chart','Relatório do mês','Quantos contatos chegaram, quantos agendaram e quanto entrou de proposta.','relatorios'],
   ];
@@ -222,7 +223,7 @@ function pitchView() {
   <div class="pitch p24">
     <header class="p-top"><div class="wrap">
       <button class="lg-btn" data-a="scrollTo" data-t="topo" aria-label="Início">${logo24('', true)}</button>
-      <nav><a href="#como" data-a="scrollTo" data-t="como">Como funciona</a><a href="#nichos" data-a="scrollTo" data-t="nichos">Para quem</a><a href="#planos" data-a="scrollTo" data-t="planos">Planos</a><a href="#duvidas" data-a="scrollTo" data-t="duvidas">Dúvidas</a></nav>
+      <nav><a href="#como" data-a="scrollTo" data-t="como">Como funciona</a><a href="#followup" data-a="scrollTo" data-t="followup">Follow-up</a><a href="#nichos" data-a="scrollTo" data-t="nichos">Para quem</a><a href="#planos" data-a="scrollTo" data-t="planos">Planos</a><a href="#duvidas" data-a="scrollTo" data-t="duvidas">Dúvidas</a></nav>
       <button class="btn primary sm" data-a="go" data-r="visao">Ver demonstração ${ic('arrow')}</button>
     </div></header>
 
@@ -276,6 +277,20 @@ function pitchView() {
       </div>
       <div class="note dark-note">Assuntos de saúde, reações, fotos, doses e diagnósticos <b>nunca</b> são respondidos pela IA: ela passa na hora para a equipe, com prioridade. A 24AGÁ organiza e encaminha; a conduta é sempre do profissional.</div>
       <div class="row" style="margin-top:18px"><button class="btn primary" data-a="go" data-r="assistente">${ic('play')} Ver a simulação completa</button><button class="btn ghost-l" data-a="startTour">Tour de 6 minutos</button></div>
+    </div></section>
+
+    <section class="band" id="followup"><div class="wrap">
+      <span class="eyebrow">Follow-up automático</span>
+      <h2>Ninguém fica sem retorno. E ninguém é incomodado.</h2>
+      <p class="lead">Você programa a recorrência uma vez. A 24AGÁ envia cada mensagem na hora certa, personaliza com o que o paciente pediu e para sozinha quando ele responde ou agenda.</p>
+      <div class="fu-tl">
+        <div><div class="when">1 hora<small>depois da última mensagem</small></div><div class="msg">Oi, Mariana! Vi que a nossa conversa ficou pela metade. Quer que eu te mostre os horários livres?</div></div>
+        <div><div class="when">1 dia<small>depois, se não respondeu</small></div><div class="msg">Mariana, ficou alguma dúvida? Tenho horários livres nesta semana. Posso reservar um?</div></div>
+        <div><div class="when">3 dias<small>depois, última tentativa</small></div><div class="msg">Separei 2 horários para você. Quer que eu reserve? Se preferir, responda PARAR.</div></div>
+        <div class="stop"><div class="when">Parou<small>respondeu, agendou ou pediu</small></div><p>A sequência para na hora e a conversa volta para a IA ou para a equipe. Sem mensagem repetida para quem já marcou.</p></div>
+      </div>
+      <div class="hyp" style="margin-top:22px">${['Etapas e textos que você escolhe: minutos, horas ou dias','Não envia à noite nem em dia fechado: espera a abertura','Para quando o paciente responde, agenda ou pede PARAR','Começa sozinho: conversa parada, sem agendamento, proposta sem resposta ou falta','IA personaliza com o serviço de interesse do paciente','Nunca faz follow-up de assunto de saúde'].map(t => `<div>${ic('check')}<span>${t}</span></div>`).join('')}</div>
+      <div class="row" style="margin-top:20px"><button class="btn primary" data-a="go" data-r="followup">${ic('play')} Ver o follow-up funcionando</button></div>
     </div></section>
 
     <section class="band ivory" id="nichos"><div class="wrap">
@@ -343,6 +358,7 @@ function pitchView() {
         ['Preciso trocar meu número de WhatsApp?','Não. Conectamos o número da clínica à API oficial da Meta na implantação. Seus pacientes continuam falando com o mesmo número.'],
         ['E se o paciente quiser falar com uma pessoa?','A conversa passa para a equipe na hora, com todo o histórico. Fora do horário, a IA avisa quando a equipe retorna.'],
         ['Quanto tempo leva para começar?','Depois da assinatura, a implantação leva de 7 a 15 dias: conexão do WhatsApp, cadastro dos serviços, treinamento da IA e da equipe.'],
+        ['O follow-up não vai incomodar meus pacientes?','Não. Você escolhe quantas mensagens e de quanto em quanto tempo. A 24AGÁ não envia à noite nem em dia fechado, para quando o paciente responde ou agenda e respeita quem pede PARAR.'],
         ['Funciona no celular?','Sim. Agenda, aprovações e conversas funcionam no celular e no computador, sem precisar baixar nada na loja.'],
         ['Tem fidelidade?','O contrato mínimo é de 6 meses. Depois disso, você pode cancelar quando quiser.'],
       ].map(([q,a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div>

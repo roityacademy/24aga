@@ -231,6 +231,44 @@ create table if not exists public.support_tickets (
   created_at timestamptz not null default now()
 );
 
+-- ---------- Follow-up automático ----------
+create table if not exists public.followup_settings (
+  tenant_id uuid primary key references public.tenants(id) on delete cascade,
+  enabled boolean not null default true,
+  stop_on_reply boolean not null default true,
+  stop_on_booking boolean not null default true,
+  quiet_start time default '20:00', quiet_end time default '08:00',
+  skip_closed_days boolean not null default true,
+  skip_health boolean not null default true,
+  ai_personalize boolean not null default true,
+  triggers text[] not null default '{semResposta,naoAgendou,proposta,faltou}'
+);
+
+create table if not exists public.followup_steps (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references public.tenants(id) on delete cascade,
+  position int not null,
+  delay_minutes int not null check (delay_minutes > 0),   -- 60 = 1 hora, 1440 = 1 dia, 4320 = 3 dias
+  template text not null,
+  wa_template_name text,                                  -- modelo aprovado pela Meta (fora da janela de 24h)
+  active boolean not null default true
+);
+
+create table if not exists public.followup_runs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references public.tenants(id) on delete cascade,
+  patient_id uuid not null references public.patients(id) on delete cascade,
+  reason text not null check (reason in ('semResposta','naoAgendou','proposta','faltou')),
+  status text not null default 'ativo' check (status in ('ativo','respondeu','agendou','parou','concluido','pausado','saude')),
+  current_step int not null default 0,
+  last_message_at timestamptz not null default now(),
+  next_send_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists followup_due on public.followup_runs(next_send_at) where status = 'ativo';
+
+alter table public.patients add column if not exists followup_opt_out boolean not null default false;
+
 -- ---------- Leads do site (formulário "Quero a 24h") ----------
 create table if not exists public.leads (
   id uuid primary key default gen_random_uuid(),
@@ -262,7 +300,8 @@ do $$
 declare t text;
 begin
   foreach t in array array['staff','rooms','services','business_hours','patients','appointments','appointment_log',
-                           'conversations','messages','proposals','notifications','tasks','automations','ai_settings']
+                           'conversations','messages','proposals','notifications','tasks','automations','ai_settings',
+                           'followup_settings','followup_steps','followup_runs']
   loop
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists tenant_rw on public.%I', t);

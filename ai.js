@@ -45,6 +45,7 @@ function patientSays(c, text, opts={}) {
   c.msgs.forEach(m => { if (m.opts) m.opts = null; });
   c.msgs.push({ from:'paciente', text, at:nowIso() });
   const p = patById(c.pid); if (p) p.last = nowIso();
+  if (typeof fuOnPatientMessage === 'function') fuOnPatientMessage(p, text);
   if (c.state === 'resolvida') c.state = 'ia';
   if (!S.ai.on && c.state === 'ia') { c.state = 'aguardando'; c.msgs.push({ from:'sistema', text:'Assistente desligada · mensagem aguardando a equipe', at:nowIso() }); notify('humano', `${p.name} aguarda resposta (assistente desligada)`, ['atendimento', c.id]); return commit(); }
   if (c.state !== 'ia') { if (UI.sel.conv !== c.id) c.unread = (c.unread||0) + 1; return commit(); }
