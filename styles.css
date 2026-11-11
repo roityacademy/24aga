@@ -742,3 +742,14 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
 .lg24 .tg{font-family:var(--f-body);font-size:9.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;opacity:.75}
 .lg24.big .tg{font-size:11px}
 .lg24.sm .tg{font-size:8px}
+.exit24{position:relative;padding:28px 24px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.exit24 .x-btn{position:absolute;top:12px;right:12px}
+.exit24 .lg24{color:var(--fg)}
+.exit24 h3{font-size:24px;font-weight:800;margin-top:6px}
+.exit24 p{color:var(--muted);max-width:40ch}
+.exit24 p b{color:var(--fg)}
+.btn.wa{background:#25D366;border-color:#25D366;color:#fff;font-weight:600;font-size:16px;padding:13px 18px;text-decoration:none}
+.btn.wa:hover{background:#1EBE5A}
+.wa-num{font-size:13px;color:var(--muted);margin-top:-4px}
+.exit-acts{width:100%;gap:8px;flex-wrap:wrap}
+.exit-acts .btn{flex:1 1 160px}

@@ -371,6 +371,20 @@ function pitchView() {
   </div>`;
 }
 
+const waLink = txt => `https://wa.me/${CFG.WHATSAPP || '5566999087424'}?text=${encodeURIComponent(txt)}`;
+function exitModal() {
+  const msg = `Olá! Vi a demonstração da 24AGÁ (${NICHES[S.niche].label}) e quero agendar minha reunião demonstrativa.`;
+  openModal(`<div class="exit24">
+    <button class="x-btn" data-a="closeModal" aria-label="Fechar">${ic('x')}</button>
+    ${logo24('', true)}
+    <h3>Tem certeza que quer sair?</h3>
+    <p>Envie uma mensagem e <b>agende a sua reunião demonstrativa agora</b>. Em 20 minutos mostramos a 24AGÁ com os serviços da sua clínica.</p>
+    <a class="btn wa wide" href="${waLink(msg)}" target="_blank" rel="noopener">${IC_WA} Agendar pelo WhatsApp</a>
+    <div class="wa-num">(66) 99908-7424</div>
+    <div class="row exit-acts"><button class="btn wide" data-a="closeModal">Continuar na demonstração</button><button class="btn ghost wide" data-a="go" data-r="pitch" data-force="1">Sair mesmo assim</button></div>
+  </div>`);
+}
+const IC_WA = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor;stroke:none"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3a.4.4 0 0 0 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3Z"/></svg>';
 function nextStepsModal() {
   openModal(`${mHead('Como contratar','Nenhum pagamento é feito por aqui.')}
   <div class="mb"><div class="timeline-v">
@@ -482,7 +496,7 @@ function render() {
 
 /* ---------- Ações globais ---------- */
 const A = {
-  go: t => { const r = t.dataset.r; if (r === 'pitch') return goTo('pitch'); if (UI.mode === 'pitch' && !UI.loggedOnce && r !== 'licencas') { UI.pendingRoute = r; UI.mode = 'login'; render(); window.scrollTo(0,0); return; } closeModal(); goTo(r); },
+  go: t => { const r = t.dataset.r; if (r === 'pitch') { if (UI.mode !== 'pitch' && !t.dataset.force) return exitModal(); closeModal(); return goTo('pitch'); } if (UI.mode === 'pitch' && !UI.loggedOnce && r !== 'licencas') { UI.pendingRoute = r; UI.mode = 'login'; render(); window.scrollTo(0,0); return; } closeModal(); goTo(r); },
   login: t => { UI.profile = t.dataset.p; UI.loggedOnce = true; const r = UI.pendingRoute && PROFILES[UI.profile].routes.includes(UI.pendingRoute) ? UI.pendingRoute : PROFILES[UI.profile].routes[0]; UI.pendingRoute = null; goTo(r); },
   scrollTo: t => { const id = t.dataset.t; if (UI.mode !== 'pitch') { UI.mode = 'pitch'; render(); } const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior:'smooth' }); },
   toggleDetail: () => { UI.detail = !UI.detail; const y = scrollY; render(); scrollTo(0, y); },

@@ -5,5 +5,5 @@
 window.CFG = {
   SUPABASE_URL: '',       // ex.: https://abcdefgh.supabase.co
   SUPABASE_ANON_KEY: '',  // começa com eyJ... ou sb_publishable_...
-  WHATSAPP: '',           // WhatsApp comercial da ROITY Academy, só números com DDI: 5565999999999
+  WHATSAPP: '5566999087424',           // WhatsApp comercial da ROITY Academy, só números com DDI: 5565999999999
 };
